@@ -4,88 +4,171 @@ app.set('view engine', 'html');
 app.engine('html', require('ejs').renderFile);
 app.use(express.static("assets"));
 
-
-//routes
-app.get("/", function(req, res){
-    
-    //console.log(req.query.q1);
-    // let score = 0;
-    // let f1, f2, f3, f4, f5;
-    // f1 = f2 = f3 = f4 = f5 = "Wrong!";
-    
-    // if (req.query.q1.toLowerCase() == "sacramento") {
-    //     score += 20;
-    //     f1 = "You got it!";
-    // }
-    //res.render("index", {"score": score, "feedback1":f1});
-    
-    res.render("index.ejs");
-} );
+const request = require('request');
+const mysql = require('mysql');
 
 
-app.get("/gradeQuiz", function(req,res){
+/* **********ROUTES********** */
+
+app.get("/", async function(req, res){
+    let categories = await getCategories();
+    let authors = await getAuthors();
     
-    //console.log(req.query.q1);
-    let score = 0;
-    let f1, f2, f3, f4, f5, f6, f7, f8;
-    f1 = f2 = f3 = f4 = f5 = f6 = f7 = f8 = "Wrong!";
+    res.render("index.ejs", {"categories":categories, "authors":authors});
+}); //root route
+
+app.get("/quotes", async function(req, res){
     
-    console.log(req.query.q2 );
+    let rows = await getQuotes(req.query);
     
-    if (req.query.q1.toLowerCase() == "sacramento") {
-        score += 12.5;
-        f1 = "Right!";
-    }
-    if (req.query.q2 == "mo") {
-        score += 12.5;
-        f2 = "Right!";
-    }
-    if (req.query.q3a=="false" && req.query.q3b=="false"
-     && req.query.q3c=="true" && req.query.q3d=="true" ) {
-        score += 12.5;
-        f3 = "Right!";
-    }
-    if (req.query.q4 == "Rhode Island") {
-        score += 12.5;
-        f4 = "Right!";
-    }
-   if (req.query.q5 == "seal2") {
-        score += 12.5;
-        f5 = "Right!";
-    }
-    if (req.query.q6 == 50) {
-        score += 12.5;
-        f6 = "Right!";
-    }
-   if (req.query.q7 == "US") {
-        score += 12.5;
-        f7 = "Right!";
-    }
-   if (req.query.q8 == "Olympia") {
-        score += 12.5;
-        f8 = "Right!";
-    }
+    res.send(rows);
+
+});//quotes
+
+app.get("/authorInfo", async function(req, res){
+    
+   let rows = await getAuthorInfo(req.query.authorId);
+  //res.render("quotes", {"records":rows});
+    res.send(rows);
+});//authorInfo
+
+/* **********FUNCTIONS********** */
+
+//values in red must be updated
+function dbConnection(){
+
+    let conn = mysql.createConnection({
+        host: "cst336db.space",
+        user: "cst336_dbUser27",
+        password: "uzef6q",
+        database:"cst336_db27"
+    }); //createConnection
+
+
+return conn;
+
+}
+
+function getAuthorInfo(authorId){
+    let conn = dbConnection();
     
     
+    return new Promise(function(resolve, reject){
+        conn.connect(function(err) {
+           if (err) throw err;
+           console.log("Connected!");
+        
+           let sql = `SELECT * 
+                      FROM q_author
+                      WHERE authorId = ${authorId}`;
+            
+           conn.query(sql, function (err, rows, fields) {
+              if (err) throw err;
+              //res.send(rows);
+              conn.end();
+              resolve(rows);
+           });
+        
+        });//connect
+    });//promise
     
-    res.send( {
-        "score": score,
-        "fback1":f1,
-        "fback2":f2,
-        "fback3":f3,
-        "fback4":f4,
-        "fback5":f5,
-        "fback6":f6,
-        "fback7":f7,
-        "fback8":f8
+}
+
+
+function getQuotes(query){
+    let keyword = query.searchTerm;
+    let conn = dbConnection();
+    
+    return new Promise(function(resolve, reject){
+        conn.connect(function(err) {
+            if (err) throw err;
+            console.log("Connected!");
+            
+            let params = [];
+            
+            let sql = 
+                `SELECT * FROM q_quotes
+                NATURAL JOIN q_author 
+                WHERE
+                (quote LIKE '%${keyword}%'`;
+            
+            if (query.category) { //user selected a category
+                sql += " AND category = '" + query.category +"'"; //To prevent SQL injection, SQL statement shouldn't have any quotes.
+            }
+            
+            if (query.gender) { //user selected a sex
+                sql += " AND sex = '" + query.gender +"'"; //To prevent SQL injection, SQL statement shouldn't have any quotes.
+            }
+            
+            if (query.authorId) { //user selected a sex
+                sql += " AND authorId = " + query.authorId; //To prevent SQL injection, SQL statement shouldn't have any quotes.
+            }
+            
+            sql += ")";
+            
+            params.push(query.category);
+            params.push(query.gender);
+            params.push(query.authorId);
+            
+            conn.query(sql, params, function (err, rows, fields) {
+            if (err) throw err;
+            conn.end();
+            resolve(rows);
+            });
+        
+        });
     });
-    
-    
-    
-});
+}
 
 
-//running server
+function getAuthors(){
+    let conn = dbConnection();
+    
+    return new Promise(function(resolve, reject){
+        conn.connect(function(err) {
+           if (err) throw err;
+           console.log("Connected!");
+        
+           let sql = `SELECT authorId, firstName, lastName 
+                      FROM q_author
+                      ORDER BY authorId`;
+        
+           conn.query(sql, function (err, rows, fields) {
+              if (err) throw err;
+              //res.send(rows);
+              conn.end();
+              resolve(rows);
+           });
+        
+        });//connect
+    });//promise
+}
+
+function getCategories(){
+    
+    let conn = dbConnection();
+    
+    return new Promise(function(resolve, reject){
+        conn.connect(function(err) {
+           if (err) throw err;
+           console.log("Connected!");
+        
+           let sql = `SELECT DISTINCT category 
+                      FROM q_quotes
+                      ORDER BY category`;
+        
+           conn.query(sql, function (err, rows, fields) {
+              if (err) throw err;
+              //res.send(rows);
+              conn.end();
+              resolve(rows);
+           });
+        
+        });//connect
+    });//promise
+}
+
+//starting server
 app.listen(process.env.PORT, process.env.IP, function(){
     console.log("Express server is running...");
 })

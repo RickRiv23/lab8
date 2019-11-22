@@ -1,115 +1,95 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>US Quiz (Express)</title>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/0.10.0/lodash.min.js"></script>
-  <style>
-    label{
-      margin-right: 10px;
-    }
-  </style>
-</head>
-  <body class="text-center">
-    
-    <h1 class="jumbotron"> US Geography Quiz <br> Express Version </h1>
-    
-    <!--<form>-->
-    
-    <h3>
-      <span id="markQ1"></span> What is the capital of California?
-    </h3>
-    <input type="text" id="q1" name="q1" value="">
-    <br><br>
-    <div id="q1Feedback"></div>
-    <br>
-    
-    <h3>
-      <span id="markQ2"></span>What is the longest river?
-    </h3>
-    <select id="q2" name="q2">
-      <option value="">Select One</option>
-      <option value="ms">Mississippi</option>
-      <option selected value="mo">Missouri</option>
-      <option value="co">Colorado</option>
-      <option value="de">Delaware</option>
-    </select>
-    <br><br>
-    <div id="q2Feedback"></div>
-    <br>
-    
-    <h3>
-      <span id="markQ3"></span>What presidents are carved into mount Rushmore?
-    </h3>
-    <input type="checkbox" name="q3a" id="q3a"> <label for="q3a"> A. Jackson    </label> 
-    <input type="checkbox" name="q3b" id="q3b"> <label for="q3b">B. Franklin  </label>
-    <input type="checkbox" name="q3c" id="q3c"> <label for="q3c">T. Jefferson</label>
-    <input type="checkbox" name="q3d" id="q3d"> <label for="q3d">T. Roosevelt</label>
-    <br><br>
-    <div id="q3Feedback"></div>
-    <br>
-    
-    <h3>
-      <span id="markQ4"></span>What is the smallest US state?
-    </h3>
-    <div id="choices"> 
-    </div>
-    <br><br>
-    <div id="q4Feedback"></div>
-    <br>
-    
-    <h3>
-      <span id="markQ5"></span>Which is the correct seal of California?
-    </h3>
-    <img src="/img/seal1.png" alt= "seal1" class="q5choice" id="seal1">
-    <img src="/img/seal2.png" alt= "seal2" class="q5choice" id="seal2">
-    <img src="/img/seal3.png" alt= "seal3" class="q5choice" id="seal3">
-    
-    <input type="hidden" id="q5" value="" />
-    
-    <br><br>
-    <div id="q5Feedback"></div>
-    <br>
-    
-    <h3>
-      <span id="markQ6"></span> How many states are there?
-    </h3>
-    <input id="q6" type="number" name="states"/>
-    <br><br>
-    <div id="q6Feedback"></div>
-    <br>
-    
-    <h3>
-      <span id="markQ7"></span> What is the US currency?
-    </h3>
-    <input type="radio" name="q7" id="US" value="US"> <label for="US">Dollars</label>
-    <input type="radio" name="q7" id="EU" value="Euro"> <label for="EU">Euros</label></label>
-    <input type="radio" name="q7" id="ESP" value="Pesos"> <label for="ESP">Pesos</label>
-    <input type="radio" name="q7" id="UK" value="Pounds"> <label for="UK">Pounds</label>
-    <br><br>
-    <div id="q7Feedback"></div>
-    <br>
-    
-    <h3>
-      <span id="markQ8"></span> What is the capital of Washington?
-    </h3>
-    <input type="text" id="q8" value="" placeholder="">
-    <br><br>
-    <div id="q8Feedback"></div>
-    <br>
-    
-    
-    <button id="submitBtn" class="btn btn-outline-success"> Submit Quiz </button>
-    <br><br>
-    
-  	<h2 id="celebrate"></h2>
-    <h2 id="totalScore" class="text-info">Total Score:  </h2>
-    <h3 id="attempts" ></h3>
-    
-    <!--</form>-->
-    
-    <script src="/scripts.js"></script>
-  </body>
+    <head>
+        <title>Lab 9</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="/styles.css" type="text/css" />
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <h1>Search Famous Quotes</h1>
+        <form action="/quotes">
+            <label for="searchTerm">
+                Keyword: <input id="searchTerm" name="searchTerm" type="text" >
+            </label>
+            <label>
+                Author: 
+                <select id="searchAuthor" name="author">
+                    <option value=""> Select One </option>
+                    
+                    <% authors.forEach(function(i){ %>
+                    
+                        <option value="<%=i.authorId%>"> <%=i.firstName%> <%=i.lastName%> </option>
+                    
+                    <% }); %>
+                    
+                </select>
+            </label>
+            <label>
+                Gender: 
+                <select id="searchGender" name="gender">
+                    <option value=""> Select One </option>
+                    <option value="M"> Male </option>
+                    <option value="F"> Female </option>
+                </select>
+            </label>
+            <label>
+                Category: 
+                <select id="searchCategory" name="category">
+                    <option value=""> Select One </option>
+                    
+                    <% categories.forEach(function(i){ %>
+                    
+                        <option value="<%=i.category%>"> <%=i.category%>  </option>
+                    
+                    <% }); %>
+                    
+                </select>
+            </label>
+            <input class="js-search-btn" type='submit' value='Search'>
+        </form>
+        
+        
+        <div class="quotes-container">
+            <h1>Quotes Found:</h1>
+            <div class="js-quotes">
+                
+            </div>
+        </div>
+        
+        <!-- Modal -->
+        <div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"><h1 id="authorName"></h1></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                
+                 <div>
+                     <figure>
+                        <img id="authorImg" src="">
+                        <figcaption>
+                            <h1 id="authorName"></h1>
+                            <p id="bio"></p>
+                        </figcaption>
+                    </figure>
+                </div>
+                
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script type="text/javascript" src="/scripts.js"></script>
+    </body>
 </html>
